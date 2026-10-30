@@ -1,0 +1,32 @@
+name: Build Android APK
+on: [push, workflow_dispatch]
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Setup Android SDK and Build Tools
+        uses: android-actions/setup-android@v3
+
+      - name: Install Export Templates
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates/4.3.stable
+          curl -L -o templates.tpz https://github.com
+          unzip templates.tpz
+          mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
+          rm -rf templates templates.tpz
+
+      - name: Build Android App Package
+        uses: firebelley/godot-export@v5.2.1
+        with:
+          godot_version: 4.3
+          export_preset: Android
+          export_path: build/game.apk
+
+      - name: Upload Finished App
+        uses: actions/upload-artifact@v4
+        with:
+          name: NormalApp
+          path: build/game.apk
